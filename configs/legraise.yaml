@@ -1,0 +1,11 @@
+exercise_name: LegRaise
+counter_class: LegRaiseCounter
+module: core.legraise_counter
+orientation: side  
+preferred_side: auto
+landmarks:
+  left: [LEFT_SHOULDER, LEFT_HIP, LEFT_ANKLE]
+  right: [RIGHT_SHOULDER, RIGHT_HIP, RIGHT_ANKLE]
+reference_point: ankle
+angle_tolerance: 0
+

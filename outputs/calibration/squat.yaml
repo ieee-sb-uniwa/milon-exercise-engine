@@ -1,0 +1,11 @@
+min_angle: 60.11340316273012
+max_angle: 172.71669024593456
+down_threshold: 88.26
+up_threshold: 150.2
+ref_y_min: 0.5046271085739136
+ref_y_max: 0.6769578456878662
+down_shift_delta: 0.04308
+up_shift_delta: 0.01723
+ref_y_range: 0.17233
+use_vertical_shift: true
+frames_analyzed: 143
