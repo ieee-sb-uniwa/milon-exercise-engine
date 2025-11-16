@@ -1,0 +1,12 @@
+exercise_name: Squat
+counter_class: SquatCounter
+module: core.squat_counter
+orientation: side
+preferred_side: auto
+landmarks:
+  left:  [LEFT_HIP, LEFT_KNEE, LEFT_ANKLE]
+  right: [RIGHT_HIP, RIGHT_KNEE, RIGHT_ANKLE]
+reference_point: hip
+angle_tolerance: 30
+movement_axis: y
+
