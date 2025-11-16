@@ -2,6 +2,8 @@
 
 Exercise form analysis and biomechanical assessment using computer vision and pose estimation.
 
+![Milon Exercise Engine](pose_estimator.png)
+
 ## Project Structure
 
 ```
@@ -77,11 +79,11 @@ quality = scorer.score_rep(rep_data)
 ## Pre-trained Models & Datasets
 
 ### Pose Estimation Models (Pre-trained, Free)
+
 - **MediaPipe Pose**: Lightweight, real-time, mobile-friendly
   - Download: Automatic via `pip install mediapipe`
   - Speed: 30-60 FPS on CPU
   - Accuracy: Good for exercise tracking
-  
 - **OpenPose** (Alternative): More accurate, slower
   - Requires: CUDA GPU
   - Download: CMU OpenPose repository
@@ -89,16 +91,19 @@ quality = scorer.score_rep(rep_data)
 ### Datasets
 
 **Free/Academic:**
+
 - **NTURGB+D**: 56K action sequences (includes exercises)
 - **Penn Action**: 2,326 videos with pose annotations
 - **LSP (Leeds Sports Pose)**: 2K sport images
 
 **Custom Collection Needed:**
+
 - Exercise form videos with expert annotations
 - Multi-angle recordings for 3D analysis
 - Good/bad form examples for each exercise
 
 ### Temporal Models (Train from scratch)
+
 - **Exercise Classifier**: LSTM on pose sequences
 - **Rep Counter**: Peak detection + LSTM validation
 - **Form Scorer**: Rule-based + ML hybrid
@@ -125,11 +130,13 @@ python src/exercise/squat.py --video data/raw/videos/squat_demo.mp4
 ## Deployment Considerations
 
 **NOT recommended for smartphone app due to:**
+
 - High computational requirements (real-time video processing)
 - Battery drain from continuous inference
 - Camera angle limitations (single viewpoint)
 
 **Recommended deployment:**
+
 - Desktop/tablet application for home use
 - Gym kiosk system with fixed cameras
 - Cloud processing with video upload (non-real-time)
@@ -140,4 +147,5 @@ python src/exercise/squat.py --video data/raw/videos/squat_demo.mp4
 - **Nutrition App**: [milon-nutrition-app](https://github.com/your-org/milon-nutrition-app)
 
 ## License
+
 [Your License]
