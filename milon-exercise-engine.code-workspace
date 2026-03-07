@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "~/miniconda3/envs/milon-exercise/bin/python",
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter",
+      "editor.formatOnSave": true
+    },
+    "python.formatting.provider": "none",
+    "editor.formatOnSave": true
+  },
+  "extensions": {
+    "recommendations": ["ms-python.python", "ms-python.black-formatter"]
+  }
+}

@@ -1,143 +1,120 @@
-# MILON Pose Analysis Engine
+# Milon Exercise Engine
 
-Exercise form analysis and biomechanical assessment using computer vision and pose estimation.
+AI-powered exercise rep counter built on MediaPipe pose estimation. Designed to run as a Python package that plugs into any front-end — Streamlit dashboard, Raspberry Pi script, or a standalone cv2 window.
 
-## Project Structure
+![Milon Exercise Engine](pose_estimator.png)
 
-```
-milon-exercise-engine/
-├── data/
-│   ├── raw/
-│   │   ├── videos/          # Raw exercise videos
-│   │   └── poses/           # Pre-extracted pose data
-│   ├── processed/           # Processed sequences
-│   └── annotations/         # Form quality labels, rep counts
-├── notebooks/
-│   ├── 01_pose_estimation_baseline.ipynb
-│   ├── 02_biomechanics_features.ipynb
-│   ├── 03_rep_counting.ipynb
-│   └── 04_form_scoring.ipynb
-├── src/
-│   ├── pose/
-│   │   ├── estimator.py     # MediaPipe/OpenPose wrapper
-│   │   └── tracker.py       # Multi-person tracking
-│   ├── biomechanics/
-│   │   ├── angles.py        # Joint angle calculations
-│   │   └── form_analyzer.py # Form quality assessment
-│   ├── exercise/
-│   │   ├── squat.py         # Squat-specific analysis
-│   │   ├── deadlift.py      # Deadlift analysis
-│   │   ├── pushup.py
-│   │   └── ...
-│   ├── temporal/
-│   │   ├── rep_counter.py   # Repetition counting
-│   │   ├── pattern_recognition.py  # LSTM classifier
-│   │   └── quality_scorer.py       # Rep quality scoring
-│   └── utils/
-│       ├── video_processor.py
-│       ├── visualization.py
-│       └── metrics.py
-├── configs/
-│   └── mediapipe_config.yaml
-├── models/
-│   ├── pretrained/          # MediaPipe, OpenPose weights
-│   └── checkpoints/         # Trained exercise classifiers
-├── experiments/
-├── tests/
-└── requirements.txt
-```
+## Requirements
 
-## Framework Design
-
-### Modular Pipeline Architecture
-
-```python
-# Example usage
-from src.pose import PoseEstimator
-from src.exercise import SquatAnalyzer
-from src.temporal import RepCounter, QualityScorer
-
-# 1. Pose Estimation
-estimator = PoseEstimator(backend='mediapipe')
-poses = [estimator.estimate(frame) for frame in video_frames]
-
-# 2. Exercise-Specific Analysis
-analyzer = SquatAnalyzer()
-form_feedback = analyzer.analyze(poses)
-
-# 3. Temporal Analysis
-counter = RepCounter(exercise_type='squat')
-reps = counter.count_reps(angle_sequence)
-
-# 4. Quality Scoring
-scorer = QualityScorer()
-quality = scorer.score_rep(rep_data)
-```
-
-## Pre-trained Models & Datasets
-
-### Pose Estimation Models (Pre-trained, Free)
-- **MediaPipe Pose**: Lightweight, real-time, mobile-friendly
-  - Download: Automatic via `pip install mediapipe`
-  - Speed: 30-60 FPS on CPU
-  - Accuracy: Good for exercise tracking
-  
-- **OpenPose** (Alternative): More accurate, slower
-  - Requires: CUDA GPU
-  - Download: CMU OpenPose repository
-
-### Datasets
-
-**Free/Academic:**
-- **NTURGB+D**: 56K action sequences (includes exercises)
-- **Penn Action**: 2,326 videos with pose annotations
-- **LSP (Leeds Sports Pose)**: 2K sport images
-
-**Custom Collection Needed:**
-- Exercise form videos with expert annotations
-- Multi-angle recordings for 3D analysis
-- Good/bad form examples for each exercise
-
-### Temporal Models (Train from scratch)
-- **Exercise Classifier**: LSTM on pose sequences
-- **Rep Counter**: Peak detection + LSTM validation
-- **Form Scorer**: Rule-based + ML hybrid
+- Python 3.10+
+- Webcam or video file
 
 ## Setup
 
 ```bash
-pip install -r requirements.txt
+# 1. Clone
+git clone https://github.com/ieee-sb-uniwa/milon-exercise-engine.git
+cd milon-exercise-engine
 
-# Download MediaPipe models (automatic)
-python -c "import mediapipe as mp; mp.solutions.pose"
+# 2. Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# 3. Install the package and its dependencies
+pip install -e .
 ```
 
-## Quick Start
+Dependencies (`mediapipe`, `opencv-python`, `numpy`, `pyyaml`) are installed automatically.
 
-```bash
-# Test pose estimation on video
-python src/pose/estimator.py --video data/raw/videos/squat_demo.mp4
+## Project structure
 
-# Run squat analysis
-python src/exercise/squat.py --video data/raw/videos/squat_demo.mp4
+```
+milon_engine/
+├── core/
+│   ├── models.py           # ExerciseResult dataclass
+│   ├── pose_estimator.py   # MediaPipe wrapper  →  detect(frame)
+│   ├── visualizer.py       # Drawing layer      →  render(frame, results, result)
+│   └── frame_processor.py  # Orchestrator       →  process_frame(frame)
+├── exercises/
+│   ├── base.py             # Abstract Exercise base class
+│   ├── squat.py
+│   ├── pushup.py
+│   └── legraise.py
+├── configs/                # Per-exercise YAML configs
+│   ├── squat.yaml
+│   ├── pushup.yaml
+│   └── legraise.yaml
+└── utils/
+    └── config.py           # load_config() helper
 ```
 
-## Deployment Considerations
+## Quick start
 
-**NOT recommended for smartphone app due to:**
-- High computational requirements (real-time video processing)
-- Battery drain from continuous inference
-- Camera angle limitations (single viewpoint)
+### Webcam window (cv2)
 
-**Recommended deployment:**
-- Desktop/tablet application for home use
-- Gym kiosk system with fixed cameras
-- Cloud processing with video upload (non-real-time)
+```python
+import cv2
+from milon_engine import FrameProcessor, PoseEstimator, Visualizer, Squat, load_config
 
-## Related Repositories
+config    = load_config("squat")
+exercise  = Squat(config, fps=30.0, calibration_path="outputs/calibration/squat.yaml")
+processor = FrameProcessor(exercise, PoseEstimator(), Visualizer())
 
-- **Nutrition Module**: [milon-nutrition-training](https://github.com/your-org/milon-nutrition-training)
-- **Nutrition App**: [milon-nutrition-app](https://github.com/your-org/milon-nutrition-app)
+cap = cv2.VideoCapture(0)
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+    annotated = processor.process_frame(frame)
+    cv2.imshow("Milon", annotated)
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+```
+
+### Streamlit
+
+```python
+import cv2, streamlit as st
+from milon_engine import FrameProcessor, PoseEstimator, Visualizer, Squat, load_config
+
+config    = load_config("squat")
+exercise  = Squat(config, fps=30.0, calibration_path="outputs/calibration/squat.yaml")
+processor = FrameProcessor(exercise, PoseEstimator(), Visualizer())
+
+frame_placeholder = st.empty()
+cap = cv2.VideoCapture(0)
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+    annotated = processor.process_frame(frame)
+    frame_placeholder.image(annotated, channels="BGR")
+```
+
+## Calibration
+
+Each exercise needs a calibration YAML that defines the down/up angle thresholds for your specific setup. Place them under `outputs/calibration/<exercise_name>.yaml`.
+
+Example (`outputs/calibration/squat.yaml`):
+
+```yaml
+down_threshold: 95.0
+up_threshold: 160.0
+down_shift_delta: 0.03
+up_shift_delta: 0.01
+```
+
+## Supported exercises
+
+| Exercise | Config key | Landmarks used |
+|----------|------------|----------------|
+| Squat    | `squat`    | Hip – Knee – Ankle |
+| Push-up  | `pushup`   | Shoulder – Elbow – Wrist |
+| Leg raise | `legraise` | Hip – Knee – Ankle |
 
 ## License
-[Your License]
+
+MIT
