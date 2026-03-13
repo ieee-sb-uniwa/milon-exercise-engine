@@ -1,6 +1,5 @@
 import cv2
 import mediapipe as mp
-from mediapipe.python.solutions import pose as mp_pose
 from typing import Optional, Tuple, Any
 
 
@@ -18,7 +17,7 @@ class PoseEstimator:
         min_tracking_conf: float = 0.5,
         model_complexity: int = 0,  # 0=lite, 1=full, 2=heavy
     ):
-        self._pose = mp_pose.Pose(
+        self._pose = mp.solutions.pose.Pose(
             min_detection_confidence=min_detection_conf,
             min_tracking_confidence=min_tracking_conf,
             model_complexity=model_complexity,

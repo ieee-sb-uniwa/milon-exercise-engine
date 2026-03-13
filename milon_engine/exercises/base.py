@@ -3,7 +3,6 @@ from typing import Optional, List, Tuple
 
 import numpy as np
 import mediapipe as mp
-from mediapipe.python.solutions import pose as mp_pose
 import yaml
 
 from milon_engine.core.models import ExerciseResult
@@ -11,8 +10,8 @@ from milon_engine.core.models import ExerciseResult
 
 # Map landmark name strings → MediaPipe PoseLandmark enums
 NAME2ENUM = {
-    name: getattr(mp_pose.PoseLandmark, name)
-    for name in dir(mp_pose.PoseLandmark)
+    name: getattr(mp.solutions.pose.PoseLandmark, name)
+    for name in dir(mp.solutions.pose.PoseLandmark)
     if name.isupper()
 }
 
