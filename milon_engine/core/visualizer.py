@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-import mediapipe as mp
+from mediapipe.tasks.python.vision import drawing_utils as mp_drawing
+from mediapipe.tasks.python.vision.pose_landmarker import PoseLandmarksConnections
 from typing import Optional, Any
 
 from milon_engine.core.models import ExerciseResult
@@ -14,9 +15,6 @@ class Visualizer:
     """
 
     def __init__(self):
-        self._mp_drawing = mp.solutions.drawing_utils
-        self._mp_pose = mp.solutions.pose
-
         self._colors = {
             "accent": (0, 255, 127),
             "warning": (0, 165, 255),
@@ -67,16 +65,18 @@ class Visualizer:
 
     def _draw_skeleton(self, image: np.ndarray, raw_results: Any) -> None:
         """Draw the MediaPipe pose skeleton onto image in-place."""
-        self._mp_drawing.draw_landmarks(
+        landmark_drawing_spec = mp_drawing.DrawingSpec(
+            color=(0, 255, 127), thickness=2, circle_radius=2
+        )
+        connection_drawing_spec = mp_drawing.DrawingSpec(
+            color=(255, 100, 180), thickness=2, circle_radius=2
+        )
+        mp_drawing.draw_landmarks(
             image,
-            raw_results.pose_landmarks,
-            self._mp_pose.POSE_CONNECTIONS,
-            self._mp_drawing.DrawingSpec(
-                color=(0, 255, 127), thickness=2, circle_radius=2
-            ),
-            self._mp_drawing.DrawingSpec(
-                color=(255, 100, 180), thickness=2, circle_radius=2
-            ),
+            raw_results.pose_landmarks[0],
+            PoseLandmarksConnections.POSE_LANDMARKS,
+            landmark_drawing_spec,
+            connection_drawing_spec,
         )
 
     def _draw_feedback(

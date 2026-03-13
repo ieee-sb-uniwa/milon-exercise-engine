@@ -2,17 +2,15 @@ from abc import ABC, abstractmethod
 from typing import Optional, List, Tuple
 
 import numpy as np
-import mediapipe as mp
+from mediapipe.tasks.python.vision import PoseLandmark
 import yaml
 
 from milon_engine.core.models import ExerciseResult
 
 
-# Map landmark name strings → MediaPipe PoseLandmark enums
+# Map landmark name strings → MediaPipe PoseLandmark enum values
 NAME2ENUM = {
-    name: getattr(mp.solutions.pose.PoseLandmark, name)
-    for name in dir(mp.solutions.pose.PoseLandmark)
-    if name.isupper()
+    name: getattr(PoseLandmark, name) for name in dir(PoseLandmark) if name.isupper()
 }
 
 
