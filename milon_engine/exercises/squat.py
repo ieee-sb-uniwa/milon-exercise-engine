@@ -22,10 +22,13 @@ class Squat(Exercise):
         self.up_shift_delta: float = 0.0
         self.align_counter: int = 0
 
-        calib_path = (
-            calibration_path
-            or f"outputs/calibration/{config['exercise_name'].lower()}.yaml"
+        _default_calib = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "calibration",
+            f"{config['exercise_name'].lower()}.yaml",
         )
+        calib_path = calibration_path or os.path.normpath(_default_calib)
 
         if os.path.exists(calib_path):
             with open(calib_path, "r") as f:
