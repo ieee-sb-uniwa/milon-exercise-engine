@@ -23,24 +23,39 @@ EXERCISES = {
 choice = st.selectbox("Άσκηση", list(EXERCISES.keys()))
 config_name, ExerciseClass = EXERCISES[choice]
 
+# Store the current selection in session_state so the processor can read it.
+st.session_state["config_name"] = config_name
+st.session_state["ExerciseClass"] = ExerciseClass
+
 # ── Video processor ───────────────────────────────────────────────────────────
-# Ένα νέο αντικείμενο δημιουργείται κάθε φορά που αλλάζει η επιλογή άσκησης.
+# We use a FIXED key ("exercise_stream") so the webrtc_streamer is never
+# torn down when the user switches exercises — avoiding the Python 3.14
+# shutdown bug ('NoneType' has no attribute 'is_alive').
+# Instead, the processor checks session_state each frame and swaps the
+# internal pipeline when the exercise changes.
 
 
 class ExerciseProcessor(VideoProcessorBase):
     def __init__(self):
-        config = load_config(config_name)
-        exercise = ExerciseClass(config)
+        self._current_choice = st.session_state.get("config_name")
+        self._build_pipeline()
+
+    def _build_pipeline(self):
+        cfg_name = st.session_state.get("config_name", "squat")
+        cls = st.session_state.get("ExerciseClass", Squat)
+        config = load_config(cfg_name)
+        exercise = cls(config)
         self.processor = FrameProcessor(exercise, PoseEstimator(), Visualizer())
 
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-        # Μετατροπή frame σε BGR (format που περιμένει το OpenCV)
+        # Rebuild pipeline if the user switched exercise
+        new_choice = st.session_state.get("config_name")
+        if new_choice != self._current_choice:
+            self._current_choice = new_choice
+            self._build_pipeline()
+
         img = frame.to_ndarray(format="bgr24")
-
-        # Εκτέλεση pipeline
         annotated = self.processor.process_frame(img)
-
-        # Επιστροφή annotated frame στον browser
         return av.VideoFrame.from_ndarray(annotated, format="bgr24")
 
 
@@ -76,8 +91,7 @@ st.info(
 )
 
 webrtc_streamer(
-    key=choice,  # το key αλλάζει όταν αλλάζει η άσκηση,
-    # ώστε να ξαναδημιουργηθεί ο processor
+    key="exercise_stream",  # σταθερό key — δεν γίνεται teardown κατά την αλλαγή άσκησης
     video_processor_factory=ExerciseProcessor,
     rtc_configuration=RTC_CONFIGURATION,
     media_stream_constraints={"video": True, "audio": False},
